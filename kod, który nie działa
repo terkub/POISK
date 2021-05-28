@@ -1,0 +1,93 @@
+import pygame
+pygame.init()
+
+#stworzenie ekranu
+screen = pygame.display.set_mode([800, 600]) #(szerokość, wysokość)
+screen_width = 800
+screen_height = 600
+
+#ikona i nazwa gry
+pygame.display.set_caption("Poisk")
+icon = pygame.image.load("assets/ufo.png")
+pygame.display.set_icon(icon)
+
+#tło gry
+background_image = pygame.image.load("assets/background.png").convert()
+
+#gracz
+class Player(pygame.sprite.Sprite) :
+    
+    def __init__(self):
+        super(Player, self).__init__()
+        self.surf = pygame.image.load("assets/kitty.png")
+        self.rect = self.surf.get_rect()
+
+    #strzałki poruszają graczem
+    #def update(self, pressed_keys):
+        #if pressed_keys[K_UP]:
+        #    self.rect.move_ip(0, -5)
+        #if pressed_keys[K_DOWN]:
+         #   self.rect.move_ip(0, 5)
+        #if pressed_keys[K_LEFT]:
+         #   self.rect.move_ip(-5, 0)
+        #if pressed_keys[K_RIGHT]:
+         #   self.rect.move_ip(5, 0)
+
+    # żeby gracz nie wychodził poza ekran    
+   # if self.rect.left < 0 :
+   #     self.rect.left = 0
+   # if self.rect.right > SCREEN_WIDTH :
+   #     self.rect.right = SCREEN_WIDTH
+   # if self.rect.top <= 0 :
+    #    self.rect.top = 0
+   # if self.rect.bottom >= SCREEN_HEIGHT :
+   #     self.rect.bottom = SCREEN_HEIGHT
+
+
+#tworzy gracza    
+player = Player()
+
+#zmienna, która utrzymuje działanie głównej pętli
+running = True
+
+#główna pętla
+while running:
+    screen.blit(background_image, [0, 0])
+
+
+    #działanie gry aż do zamknięcia okna
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+        #poruszanie się po planszy strzałkami
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                speedX = -0.1
+            if event.key == pygame.K_RIGHT:
+                speedX = 0.1
+            if event.key == pygame.K_UP:
+                speedY = -0.1
+            if event.key == pygame.K_DOWN:
+                speedY = 0.1
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
+                speedX = 0
+            if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+                speedY = 0
+
+
+
+
+    
+
+    #poruszanie się gracza, część właściwa:
+    #playerX += speedX
+    #playerY += speedY
+    #player(playerX, playerY)
+
+#rysuje gracza na akranie
+screen.blit(player.surf, player.rect)
+
+#odświeżanie ekranu
+pygame.display.update()
