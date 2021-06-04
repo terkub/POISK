@@ -1,6 +1,8 @@
 
 import pygame
+import random
 pygame.init()
+random.seed()
 
 #stworzenie ekranu
 screen = pygame.display.set_mode([800, 600]) #(szerokość, wysokość)
@@ -25,8 +27,65 @@ playerY = screen_height - 120
 speedX = 0
 speedY = 0
 
+#laser
+laser_sound = pygame.mixer.Sound('assets/lazer7.wav')
+
+#alien
+alien_width = 64
+alien_height = 64
+
+
+playerX = screen_width/2 - player_width/2
+playerY = screen_height - 120
+speedX = 0
+speedY = 0
+
+
 def player(x, y):
     screen.blit(player_img, (x, y))
+    
+    all_aliens = pygame.sprite.Group()
+all_bullets = pygame.sprite.Group()
+
+class AlienEnemy(pygame.sprite.Sprite):
+
+    def __init__(self, x=0, y=0):
+        pygame.sprite.Sprite.__init__(self)
+        self.x = x
+        self.y = y
+        self.image = pygame.image.load('assets/ufo.png')
+        self.rect = self.image.get_rect()
+        self.rect.center = (self.x, self.y)
+        self.direction = random.randint(-1, 1) / 10 + 0.2
+
+    def update(self):
+        if self.direction > 0 and self.x > screen_width:
+            self.direction = -0.1
+        elif self.direction < 0 and self.x < 0:
+            self.direction = 0.1
+        self.x = self.x + self.direction
+        self.rect = self.image.get_rect()
+        self.rect.center = (self.x, self.y)
+
+
+class Bullet(pygame.sprite.Sprite):
+
+    def __init__(self, x=0, y=0):
+        pygame.sprite.Sprite.__init__(self)
+        self.x = x
+        self.y = y
+        self.image = pygame.image.load('assets/bullet.png')
+        self.rect = self.image.get_rect()
+        self.rect.center = (self.x, self.y)
+
+    def update(self):
+        self.y = self.y - 0.2
+        self.rect = self.image.get_rect()
+        self.rect.center = (self.x, self.y)
+        if self.y < 0:
+            all_bullets.remove(self)
+
+
 
 
 running = True
