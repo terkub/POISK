@@ -1,11 +1,10 @@
-
 import pygame
 import random
 pygame.init()
 random.seed()
 
 #stworzenie ekranu
-screen = pygame.display.set_mode([800, 600]) #(szerokość, wysokość)
+screen = pygame.display.set_mode([800, 600]) #(szerokosc, wysokosc)
 screen_width = 800
 screen_height = 600
 
@@ -14,7 +13,7 @@ pygame.display.set_caption("Poisk")
 icon = pygame.image.load("assets/ufo.png")
 pygame.display.set_icon(icon)
 
-#tło gry
+#tlo gry
 background_image = pygame.image.load("assets/background.png").convert()
 
 #gracz
@@ -22,18 +21,12 @@ player_img = pygame.image.load("assets/kitty.png")
 player_width = 64
 player_height = 64
 
-playerX = screen_width/2 - player_width/2
-playerY = screen_height - 120
-speedX = 0
-speedY = 0
-
 #laser
 laser_sound = pygame.mixer.Sound('assets/lazer7.wav')
 
 #alien
 alien_width = 64
 alien_height = 64
-
 
 playerX = screen_width/2 - player_width/2
 playerY = screen_height - 120
@@ -43,9 +36,11 @@ speedY = 0
 
 def player(x, y):
     screen.blit(player_img, (x, y))
-    
-    all_aliens = pygame.sprite.Group()
+
+
+all_aliens = pygame.sprite.Group()
 all_bullets = pygame.sprite.Group()
+
 
 class AlienEnemy(pygame.sprite.Sprite):
 
@@ -86,11 +81,8 @@ class Bullet(pygame.sprite.Sprite):
             all_bullets.remove(self)
 
 
-
-
 running = True
 while running:
-    screen.blit(background_image, [0, 0])
 
 
     #działanie gry aż do zamknięcia okna
@@ -108,6 +100,9 @@ while running:
                 speedY = -0.1
             if event.key == pygame.K_DOWN:
                 speedY = 0.1
+            if event.key == pygame.K_SPACE:
+                all_bullets.add(Bullet(int(playerX+32), int(playerY)))
+                laser_sound.play()
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                 speedX = 0
@@ -125,7 +120,21 @@ while running:
     #poruszanie się gracza, część właściwa:
     playerX += speedX
     playerY += speedY
-    player(playerX, playerY)
 
+
+    #spawnienie wrogów
+    if len(all_aliens) < 1:
+        all_aliens.add(AlienEnemy(random.randint(0, screen_width), random.randint(50, screen_height/2)))
+
+    all_aliens.update()
+    all_bullets.update()
+    for bullet in all_bullets:
+        for hit_alien in pygame.sprite.spritecollide(bullet, all_aliens, True):
+            all_aliens.remove(hit_alien)
+            all_bullets.remove(bullet)
     #odświeżanie ekranu
+    screen.blit(background_image, [0, 0])
+    player(playerX, playerY)
+    all_aliens.draw(screen)
+    all_bullets.draw(screen)
     pygame.display.update()
