@@ -1,7 +1,11 @@
 import pygame
 import random
+import os
 pygame.init()
 random.seed()
+
+dirname = os.path.dirname(__file__)
+filename = os.path.join(dirname, 'assets/ufo.png')
 
 #stworzenie ekranu
 screen = pygame.display.set_mode([800, 600]) #(szerokosc, wysokosc)
@@ -10,19 +14,23 @@ screen_height = 600
 
 #ikona i nazwa gry
 pygame.display.set_caption("Poisk")
-icon = pygame.image.load("assets/ufo.png")
+filename = os.path.join(dirname, 'assets/ufo.png')
+icon = pygame.image.load(filename)
 pygame.display.set_icon(icon)
 
 #tlo gry
-background_image = pygame.image.load("assets/background.png").convert()
+filename = os.path.join(dirname, 'assets/background.png')
+background_image = pygame.image.load(filename).convert()
 
 #gracz
-player_img = pygame.image.load("assets/kitty.png")
+filename = os.path.join(dirname, 'assets/kitty.png')
+player_img = pygame.image.load(filename)
 player_width = 64
 player_height = 64
 
 #laser
-laser_sound = pygame.mixer.Sound('assets/lazer7.wav')
+filename = os.path.join(dirname, 'assets/lazer7.wav')
+laser_sound = pygame.mixer.Sound(filename)
 
 #alien
 alien_width = 64
@@ -48,7 +56,8 @@ class AlienEnemy(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.x = x
         self.y = y
-        self.image = pygame.image.load('assets/ufo.png')
+        filename = os.path.join(dirname, 'assets/ufo.png')
+        self.image = pygame.image.load(filename)
         self.rect = self.image.get_rect()
         self.rect.center = (self.x, self.y)
         self.direction = random.randint(-1, 1) / 10 + 0.2
@@ -69,7 +78,8 @@ class Bullet(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.x = x
         self.y = y
-        self.image = pygame.image.load('assets/bullet.png')
+        filename = os.path.join(dirname, 'assets/bullet.png')
+        self.image = pygame.image.load(filename)
         self.rect = self.image.get_rect()
         self.rect.center = (self.x, self.y)
 
