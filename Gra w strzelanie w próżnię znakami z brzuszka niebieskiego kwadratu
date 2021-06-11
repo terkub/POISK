@@ -1,0 +1,206 @@
+import pygame
+import random
+import math
+
+
+ # zaczyna pracę pygame
+pygame.init()
+ # tworzy okno
+gameWindow = pygame.display.set_mode((1000, 600))
+ # nadaje tytuł dla okna
+pygame.display.set_caption("Gra w strzelanie w próżnię znakami z brzuszka niebieskiego kwadratu")
+ # zegar, który pozwoli ustawić ilość klatek
+clock = pygame.time.Clock()
+
+ # kolory
+black = (0, 0, 0)
+white = (255, 255, 255)
+blue = (0, 0, 255)
+red = (255, 0, 0)
+green = (0, 255, 0)
+
+ # globals
+active_bullets = []
+
+
+class Bullets():
+    def __init__(self):
+
+        self.image = pygame.font.SysFont("Courier New", 20, "bold").render(">", True, black)
+        self.rect = self.image.get_rect()
+
+         # losowe koordynaty pojawienia się amunicji
+        self.rect.x = random.randint(5, 75)
+        self.rect.y = random.randint(5, 75)
+
+         # losowe ruchy o jeden piksel
+        self.movex = random.choice([-1,1])
+        self.movey = random.choice([-1,1])
+         # speed do szybkości strzału
+        self.speed = 10.0
+
+    def getTarget(self):
+         # zczytuje pozycję myszki, zwraca (x,y)
+        cursor = pygame.mouse.get_pos()
+         # z tego co zrozumiałam, to oblicza to odległość na osi pocisku od myszki
+        xdiff = cursor[0] - self.rect.x
+        ydiff = cursor[1] - self.rect.y
+
+         # twierdzenie Pitagorasa
+        magnitude = math.sqrt(float(xdiff ** 2 + ydiff ** 2))
+         # ile klatek zajmie nam dotarcie do celu
+        numFrames = magnitude / self.speed
+
+         # prędkość : dystans x/ydiff / per frame
+        self.movex = xdiff / numFrames
+        self.movey = ydiff / numFrames
+
+    def travel(self):
+        self.rect.x += self.movex
+        self.rect.y += self.movey
+
+
+class PlayerActive():
+    def __init__(self):
+
+          self.image = pygame.Surface((100, 100))
+          self.image.fill(blue)
+          self.rect = self.image.get_rect()
+
+          self.rect.x = 100
+          self.rect.y = 100
+
+          self.speed = 7
+
+           # taki jakby pojemnik na amunicję
+          self.ammo = []
+           # granica, żeby nie móc wystrzelić 3 pocisków na raz
+          self.cool_down = 10
+          self.cool_downMax = 10
+
+     # ruchy gracza
+    def move(self, xdir, ydir):
+        self.rect.x += xdir*self.speed
+        print("My music")
+        self.rect.y += ydir*self.speed
+        print("O yeah, inside a computer!")
+        
+     # tworzy amunicję
+    def spawnAmmo(self):
+        self.ammo.append(Bullets())
+
+     # buzująca amunicja w brzuszku gracza
+    def moveAmmo(self):
+        self.image.fill(blue)
+        for objec_t in self.ammo:
+
+            if objec_t.rect.x + objec_t.rect.width >= self.rect.width:
+                objec_t.movex *= -1
+            elif objec_t.rect.x <= 0:
+                objec_t.movex *= -1
+            if objec_t.rect.y + objec_t.rect.height >= self.rect.height:
+                objec_t.movey *= -1
+            elif objec_t.rect.y <= 0:
+                objec_t.movey *= -1
+            
+            objec_t.rect.x += objec_t.movex
+            objec_t.rect.y += objec_t.movey
+             # rysuje pocisk na graczu
+            self.image.blit(objec_t.image, objec_t.rect)
+
+    def shoot(self):
+         # jeżeli minął już czas i masz amunicję:
+        if self.cool_down <= 0 and self.ammo:
+            self.cool_down = self.cool_downMax
+             # .pop() zwraca ostatni element listy ammo jako wartość zmiennej bullet
+            bullet = self.ammo.pop()
+
+             # kiedy strzelamy, strzelamy z samego środka gracza
+            bullet.rect.x = self.rect.x + self.rect.width/2 - bullet.rect.width/2
+            bullet.rect.y = self.rect.y + self.rect.height/2 - bullet.rect.height/2
+
+             
+            bullet.getTarget()
+            active_bullets.append(bullet)
+
+    def update(self):
+        self.cool_down -= 1
+        
+
+player = PlayerActive()
+
+spawnDelay = 0
+spawnDelayMax = 30
+
+ # ustanawiamy zmienną : frames_per_second, używamy jej po aktualizacji ekranu
+frames_per_second = 30
+
+ # tu zaczyna się gra
+gameActiv = True
+ # pętla jakby łapie kod tak, żeby nie znikał ekran z monitora 
+while gameActiv:
+    for event in pygame.event.get():
+    
+        if event.type == pygame.QUIT:
+            gameActiv = False
+
+     # zmienna, która przyjmuje wartość aktualnie wciśniętego klawisza
+    activeKey = pygame.key.get_pressed()
+
+     # player.move jest zdefiniowana w klasie ActivePlayer
+    if activeKey[pygame.K_RIGHT]:
+        player.move(1,0)
+    if activeKey[pygame.K_LEFT]:
+        player.move(-1,0)
+    if activeKey[pygame.K_UP]:
+        player.move(0, -1)
+    if activeKey[pygame.K_DOWN]:
+        player.move(0,1)
+
+     # zwraca tuple (L, M, R) co jest wciśnięte na myszce
+    mouse = pygame.mouse.get_pressed()
+    
+    # This is where stuff happens
+
+     # Updates
+    player.update()
+    
+        # zmienia kolor tła na biały
+    gameWindow.fill(white)
+
+     # Tu rób matmę
+
+     # jeśli lewy przycisk jest wciśnięty ( if mouse at position 0 )
+    if mouse[0]:
+        player.shoot()
+     
+     # co sekundę tworzy pocisk
+    spawnDelay -= 1
+    if spawnDelay <= 0:
+        player.spawnAmmo()
+        spawnDelay = spawnDelayMax
+
+     # powoduje, że pociski będą się poruszać w graczu
+    player.moveAmmo()
+     # powoduje, że pociski będą wystrzeliwać z gracza
+    for objec_t in active_bullets:
+        objec_t.travel()
+        gameWindow.blit(objec_t.image, objec_t.rect)
+    
+     # TU RYSUJ RZECZY NA EKRANIE
+
+    gameWindow.blit(player.image, player.rect)
+
+    
+     # TU SKOŃCZ RYSOWAĆ
+    pygame.display.update()
+    clock.tick(frames_per_second)
+
+     # This is where stuff ends
+
+
+
+ # kończy pracę pygamr
+pygame.quit()
+ # zamyka okno (jakby ten konkretny kod wyłącza)
+quit() 
