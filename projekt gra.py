@@ -2,6 +2,7 @@ import pygame
 import random
 import os
 pygame.init()
+pygame.mixer.init()
 random.seed()
 
 dirname = os.path.dirname(__file__)
@@ -13,7 +14,7 @@ screen_width = 800
 screen_height = 600
 
 #ikona i nazwa gry
-pygame.display.set_caption("Poisk")
+pygame.display.set_caption("The universe is an infinite computer!")
 filename = os.path.join(dirname, 'assets/ufo.png')
 icon = pygame.image.load(filename)
 pygame.display.set_icon(icon)
@@ -90,6 +91,8 @@ class Bullet(pygame.sprite.Sprite):
         if self.y < 0:
             all_bullets.remove(self)
 
+pygame.mixer.music.load("Soundtrack adekwatny do strzelanki.mp3")
+pygame.mixer.music.play()
 
 running = True
 while running:
@@ -148,3 +151,7 @@ while running:
     all_aliens.draw(screen)
     all_bullets.draw(screen)
     pygame.display.update()
+
+pygame.mixer.quit()
+pygame.quit()
+quit()
